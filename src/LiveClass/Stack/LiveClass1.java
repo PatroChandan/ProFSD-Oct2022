@@ -53,9 +53,10 @@ public class LiveClass1 {
 //        System.out.println(minimumOperationAns);
 
 
-        System.out.println(InfixToPostFix("a-b/c-d*c"));
+//        System.out.println(InfixToPostFix("a-b/c-d*c"));
+//        System.out.println(InfixToPreFix("a-b/c-d*c"));
 
-
+        System.out.println(postfixToInfix("abc/-dc*-"));
     }
 
     /*
@@ -236,7 +237,7 @@ public class LiveClass1 {
 
     /*
         Question: Infix To postfix
-        Input: "a-b/c - d*c
+        Input: "a-b/c - d*c"
         Output: abc/-dc*-
      */
 
@@ -271,10 +272,98 @@ public class LiveClass1 {
     public static int getPrecedence(char ch) {
         if(ch == '-' || ch == '+') {
             return 1;
-        } else {
+        } else if(ch == '*' || ch == '/') {
             return 2;
+        } else if(ch == '^') {
+            return 3;
         }
+
+        return 0;
     }
+
+
+    /*
+        Question: Infix to prefix
+        Input: "a-b/c - d*c"
+        Output:
+     */
+
+    public static String InfixToPreFix(String infixStr) {
+
+//        1. reverse the Infix String
+        infixStr =  util.reverseString(infixStr);
+
+//        2. Do Infix to PostFix like handdeling with one rule change
+//        Case1 -> precedenceOfChar <= precedenceOfTopOfTheStack && char = ^ -> then pop
+//        Case2 -> precedenceOfChar < precedenceOfTopOfTheStack && char (-,+,*,/)  -> then pop
+
+
+        StringBuilder sb = new StringBuilder();
+        Stack<Character> stack = new Stack<>();
+
+        for (int i = 0; i < infixStr.length(); i++) {
+            char ch = infixStr.charAt(i);
+            if(ch >= 'a' && ch <= 'z') {
+                sb.append(ch);
+            } else {
+                int precedenceOfChar = getPrecedence(ch);
+//                removing higher precedence from stack || removing the same precedence from stack
+                while(!stack.isEmpty() && (getPrecedence(stack.peek()) >= precedenceOfChar && ch == '^')
+                || !stack.isEmpty() && (getPrecedence(stack.peek()) > precedenceOfChar) ) {
+                    char popChar = stack.pop();
+                    sb.append(popChar);
+                }
+                stack.push(ch);
+            }
+        }
+
+        while (!stack.isEmpty()) {
+            char popChar = stack.pop();
+            sb.append(popChar);
+        }
+
+        return util.reverseString(sb.toString());
+    }
+
+
+    /*
+        Question: Postfix to Infix
+        Input: abc/-dc*-
+        Output: a-b/c-d*c
+     */
+
+    public static String postfixToInfix(String postFixExpression) {
+        Stack<String> stack = new Stack<>();
+
+//        Case1: If you see Operand -> simply push in the stack
+//        Case2: If you see any Operator
+//            -> pop 2 values from the stack
+//            -> Merge popVal2 operator and popVal1 in this sequence.
+//            -> put the above result in the stack
+
+        for (int i = 0; i < postFixExpression.length(); i++) {
+            char ch = postFixExpression.charAt(i);
+            boolean isCharacterOperator = util.isOperator(ch);
+            if(!isCharacterOperator) {
+                stack.push(ch + "");
+            } else {
+                String popVal1 = stack.pop();
+                String popVal2 = stack.pop();
+
+                String mergedEquation = popVal2 + ch + popVal1;
+                stack.push(mergedEquation);
+            }
+        }
+
+        return stack.peek();
+
+    }
+
+
+
+
+
+
 
 
 
